@@ -14,12 +14,16 @@ Office documents.
 
 ## Using the app
 
-1. **Add files…**, **Add folder…** or drag files and folders onto the window. Office documents get a `DOC` badge.
-2. Select the rows to change (Ctrl/Cmd-click for several, or the header checkbox for all).
-3. In the right-hand panel, tick each value you want to change and enter it. **Fill with values of the first selected file** copies the current values in as a starting point, and **Now** inserts the current time.
-4. Choose whether the dates you type are local time or UTC, then click **Apply to selected**.
+1. **Add files**, **Add folder** or drag files and folders onto the window. Word, Excel and PowerPoint files show a coloured icon.
+2. Select the files to change: click, Ctrl/Cmd-click to add one, Shift-click for a range, or Ctrl/Cmd+A for all. The filter box narrows the list, and the column headers sort it.
+3. The right-hand panel shows the values the selected files share, or **Mixed values** where they differ. Edit the ones you want to change. Each edited field gets a dot and an undo button, and the clock button inserts the current time.
+4. Click **Apply** (Ctrl/Cmd+Enter) to write every edited value to every selected file.
 
-Only the ticked values change. Editing document properties alone keeps the file's own dates. **Copy each document's created / last saved dates to its file dates** syncs the two per file. Files that are not Office documents get their file dates changed and their document fields skipped, with a note in the status bar.
+Only edited values change. Editing document properties alone keeps the file's own dates. **Match document dates** sets each document's file created/modified dates to its own document created/last saved dates. Files that are not Office documents get their file dates changed and their document fields skipped, and a note says so.
+
+The **Local time / UTC** switch in the title bar applies to every date, both the ones shown and the ones you type.
+
+Keyboard: Ctrl/Cmd+O adds files, Shift+Ctrl/Cmd+O adds a folder, Ctrl/Cmd+F filters, the arrow keys move the selection (with Shift to extend it), Delete removes files from the list (it never deletes them from disk), and Esc clears the selection.
 
 ## Core modules
 
@@ -55,5 +59,16 @@ cargo run -p metastamp          # start the app
 On Linux the app needs the WebKitGTK development packages (see `.github/workflows/ci.yml`).
 
 To build installers: `cargo install tauri-cli --version "^2"`, then run `cargo tauri build` in `app/`. The **Build installers** workflow does this on every push and PR and uploads the Windows `.msi`/`.exe` and the macOS `.dmg` as artifacts.
+
+## Releasing
+
+Set the new version in `app/tauri.conf.json` (and `app/Cargo.toml`), merge it to `main`, then push a matching tag:
+
+```sh
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The **Release** workflow checks that the tag matches the app version, builds the Windows `.msi` and setup `.exe` and the macOS `.dmg` on GitHub's runners (no local MSVC needed), and publishes them as a GitHub Release with generated notes.
 
 CI runs fmt, clippy and the tests on Linux, Windows and macOS.

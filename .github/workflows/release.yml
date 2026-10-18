@@ -1,0 +1,69 @@
+name: Release
+
+# Push a tag such as v0.1.0 to build the installers and publish them as a
+# GitHub Release. The tag must match the version in app/tauri.conf.json.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check that the tag matches the app version
+        run: |
+          app_version=$(jq -r .version app/tauri.conf.json)
+          if [ "${GITHUB_REF_NAME}" != "v${app_version}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match app/tauri.conf.json version ${app_version}. Bump the version or tag v${app_version}."
+            exit 1
+          fi
+
+  bundle:
+    needs: check-version
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install the Tauri CLI
+        run: cargo install tauri-cli --version "^2" --locked
+      - name: Build the app and its installers
+        working-directory: app
+        run: cargo tauri build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MetaStamp-${{ runner.os }}
+          path: |
+            target/release/bundle/msi/*.msi
+            target/release/bundle/nsis/*.exe
+            target/release/bundle/dmg/*.dmg
+          if-no-files-found: error
+
+  release:
+    needs: bundle
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Publish the GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: MetaStamp ${{ github.ref_name }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            dist/**/*.msi
+            dist/**/*.exe
+            dist/**/*.dmg

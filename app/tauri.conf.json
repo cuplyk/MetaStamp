@@ -11,10 +11,10 @@
     "windows": [
       {
         "title": "MetaStamp",
-        "width": 1180,
-        "height": 760,
-        "minWidth": 900,
-        "minHeight": 560,
+        "width": 1280,
+        "height": 800,
+        "minWidth": 980,
+        "minHeight": 600,
         "dragDropEnabled": true
       }
     ],
