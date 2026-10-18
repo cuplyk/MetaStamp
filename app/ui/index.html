@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MetaStamp</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="toolbar">
+    <div class="brand">MetaStamp</div>
+    <button id="add-files" class="primary">Add files…</button>
+    <button id="add-folder">Add folder…</button>
+    <button id="remove" disabled>Remove</button>
+    <button id="clear" disabled>Clear</button>
+    <span class="spacer"></span>
+    <label class="switch"><input type="checkbox" id="show-utc" /> Show times in UTC</label>
+  </header>
+
+  <main>
+    <section class="files">
+      <table id="table">
+        <thead>
+          <tr>
+            <th class="check"><input type="checkbox" id="select-all" title="Select all" /></th>
+            <th>Name</th>
+            <th>File created</th>
+            <th>File modified</th>
+            <th>Doc created</th>
+            <th>Doc last saved</th>
+            <th>Author</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div id="empty" class="empty">
+        <p class="big">Drop Office documents or folders here</p>
+        <p>or use <strong>Add files…</strong>. Word, Excel and PowerPoint files (.docx, .xlsx, .pptx) get their
+          document properties edited too; any other file gets its file dates only.</p>
+      </div>
+    </section>
+
+    <aside class="editor">
+      <h2>Edit <span id="sel-count">0 files</span></h2>
+      <button id="fill" class="link" disabled>Fill with values of the first selected file</button>
+
+      <fieldset>
+        <legend>File dates</legend>
+        <div class="field" data-group="fs" data-key="created">
+          <input type="checkbox" /><span>Created</span><input type="datetime-local" step="1" />
+          <button class="now" title="Set to now">Now</button>
+        </div>
+        <div class="field" data-group="fs" data-key="modified">
+          <input type="checkbox" /><span>Modified</span><input type="datetime-local" step="1" />
+          <button class="now" title="Set to now">Now</button>
+        </div>
+        <div class="field" data-group="fs" data-key="accessed">
+          <input type="checkbox" /><span>Accessed</span><input type="datetime-local" step="1" />
+          <button class="now" title="Set to now">Now</button>
+        </div>
+        <label class="option"><input type="checkbox" id="fs-from-core" />
+          Copy each document's created / last saved dates to its file dates</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Document properties (core.xml)</legend>
+        <div class="field" data-group="core" data-key="created">
+          <input type="checkbox" /><span>Created</span><input type="datetime-local" step="1" />
+          <button class="now" title="Set to now">Now</button>
+        </div>
+        <div class="field" data-group="core" data-key="modified">
+          <input type="checkbox" /><span>Last saved</span><input type="datetime-local" step="1" />
+          <button class="now" title="Set to now">Now</button>
+        </div>
+        <div class="field" data-group="core" data-key="lastPrinted">
+          <input type="checkbox" /><span>Last printed</span><input type="datetime-local" step="1" />
+          <button class="now" title="Set to now">Now</button>
+        </div>
+        <div class="field" data-group="core" data-key="creator">
+          <input type="checkbox" /><span>Author</span><input type="text" />
+        </div>
+        <div class="field" data-group="core" data-key="lastModifiedBy">
+          <input type="checkbox" /><span>Last saved by</span><input type="text" />
+        </div>
+        <div class="field" data-group="core" data-key="revision">
+          <input type="checkbox" /><span>Revision</span><input type="text" inputmode="numeric" />
+        </div>
+        <div class="field" data-group="core" data-key="title">
+          <input type="checkbox" /><span>Title</span><input type="text" />
+        </div>
+      </fieldset>
+
+      <fieldset class="zone">
+        <legend>Dates I type are in</legend>
+        <label><input type="radio" name="zone" value="local" checked /> Local time</label>
+        <label><input type="radio" name="zone" value="utc" /> UTC</label>
+      </fieldset>
+
+      <button id="apply" class="primary wide" disabled>Apply to selected</button>
+      <p id="hint" class="hint"></p>
+    </aside>
+  </main>
+
+  <footer id="status">Ready.</footer>
+  <div id="drop" class="drop hidden">Drop to add</div>
+
+  <script src="main.js"></script>
+</body>
+</html>
