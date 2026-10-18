@@ -1,1 +1,4 @@
 /target
+
+# Reference tool used during the design analysis; keep it out of the repo
+BulkFileChanger.*

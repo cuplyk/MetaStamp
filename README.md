@@ -4,13 +4,34 @@ A lightweight desktop app (Rust + Tauri) to quickly edit the internal metadata
 (`docProps/core.xml`) and the filesystem timestamps (created / modified) of
 Office documents.
 
+## Features
+
+- Edit the document properties stored inside `.docx`, `.xlsx`, `.pptx` (and other OOXML) files: created, last saved, last printed, author, last modified by, revision and title.
+- Edit the file's own created / modified dates on disk.
+- Work on many files at once: add files or whole folders, select some or all, and change only the fields you edit.
+- **Match document dates** in one click, so the file dates agree with the dates stored in the document.
+- Local time or UTC input, with correct daylight-saving handling.
+- Safe writes: every other part of the document is copied byte for byte and the file is replaced atomically. No Office installation and no Windows Property System needed.
+
+## Download
+
+Grab the latest build from the [Releases](https://github.com/cuplyk/MetaStamp/releases) page:
+
+| File | Platform |
+|---|---|
+| `MetaStamp_<version>_x64_en-US.msi` | Windows installer (MSI) |
+| `MetaStamp_<version>_x64-setup.exe` | Windows installer (setup) |
+| `MetaStamp_<version>_x64_portable.exe` | Windows, no installation: run it from any folder or a USB stick |
+| `MetaStamp_<version>_*.dmg` | macOS |
+
+Windows builds use the WebView2 runtime included in Windows 10 and 11.
+
 ## Layout
 
 | Path | What it is |
 |---|---|
 | `app` | The desktop app (Tauri 2). `src/commands.rs` exposes the core library to the interface, and `ui/` is plain HTML/CSS/JS with no build step. |
 | `crates/metastamp-core` | The engine: reads and patches `core.xml`, rewrites the package safely, sets filesystem timestamps with the standard library. No Windows Property System, no Office required. |
-| `BulkFileChanger.*` | Reference tool used for the static analysis that shaped the design. |
 
 ## Using the app
 
@@ -48,15 +69,15 @@ stamp("report.docx".as_ref(), &StampRequest {
 })?;
 ```
 
-## Development
+## Building from source
+
+Requirements: a recent stable Rust toolchain (the crates use edition 2024). On Linux, the WebKitGTK development packages are also needed (see `.github/workflows/ci.yml`).
 
 ```
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 cargo run -p metastamp          # start the app
 ```
-
-On Linux the app needs the WebKitGTK development packages (see `.github/workflows/ci.yml`).
 
 To build installers: `cargo install tauri-cli --version "^2"`, then run `cargo tauri build` in `app/`. The **Build installers** workflow does this on every push and PR and uploads the Windows `.msi`/`.exe`, the portable Windows `.exe` and the macOS `.dmg` as artifacts.
 
