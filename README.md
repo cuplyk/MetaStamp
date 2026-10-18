@@ -8,8 +8,18 @@ Office documents.
 
 | Path | What it is |
 |---|---|
+| `app` | The desktop app (Tauri 2). `src/commands.rs` exposes the core library to the interface, and `ui/` is plain HTML/CSS/JS with no build step. |
 | `crates/metastamp-core` | The engine: reads and patches `core.xml`, rewrites the package safely, sets filesystem timestamps with the standard library. No Windows Property System, no Office required. |
 | `BulkFileChanger.*` | Reference tool used for the static analysis that shaped the design. |
+
+## Using the app
+
+1. **Add files…**, **Add folder…** or drag files and folders onto the window. Office documents get a `DOC` badge.
+2. Select the rows to change (Ctrl/Cmd-click for several, or the header checkbox for all).
+3. In the right-hand panel, tick each value you want to change and enter it. **Fill with values of the first selected file** copies the current values in as a starting point, and **Now** inserts the current time.
+4. Choose whether the dates you type are local time or UTC, then click **Apply to selected**.
+
+Only the ticked values change. Editing document properties alone keeps the file's own dates. **Copy each document's created / last saved dates to its file dates** syncs the two per file. Files that are not Office documents get their file dates changed and their document fields skipped, with a note in the status bar.
 
 ## Core modules
 
@@ -37,8 +47,13 @@ stamp("report.docx".as_ref(), &StampRequest {
 ## Development
 
 ```
-cargo test
-cargo clippy --all-targets -- -D warnings
+cargo test --workspace
+cargo clippy --workspace --all-targets -- -D warnings
+cargo run -p metastamp          # start the app
 ```
 
-CI runs both on Linux, Windows and macOS.
+On Linux the app needs the WebKitGTK development packages (see `.github/workflows/ci.yml`).
+
+To build installers: `cargo install tauri-cli --version "^2"`, then run `cargo tauri build` in `app/`. The **Build installers** workflow does this on every push and PR and uploads the Windows `.msi`/`.exe` and the macOS `.dmg` as artifacts.
+
+CI runs fmt, clippy and the tests on Linux, Windows and macOS.
