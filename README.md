@@ -58,7 +58,7 @@ cargo run -p metastamp          # start the app
 
 On Linux the app needs the WebKitGTK development packages (see `.github/workflows/ci.yml`).
 
-To build installers: `cargo install tauri-cli --version "^2"`, then run `cargo tauri build` in `app/`. The **Build installers** workflow does this on every push and PR and uploads the Windows `.msi`/`.exe` and the macOS `.dmg` as artifacts.
+To build installers: `cargo install tauri-cli --version "^2"`, then run `cargo tauri build` in `app/`. The **Build installers** workflow does this on every push and PR and uploads the Windows `.msi`/`.exe`, the portable Windows `.exe` and the macOS `.dmg` as artifacts.
 
 ## Releasing
 
@@ -69,6 +69,10 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-The **Release** workflow checks that the tag matches the app version, builds the Windows `.msi` and setup `.exe` and the macOS `.dmg` on GitHub's runners (no local MSVC needed), and publishes them as a GitHub Release with generated notes.
+The **Release** workflow checks that the tag matches the app version, builds the Windows `.msi`, setup `.exe` and portable `.exe` and the macOS `.dmg` on GitHub's runners (no local MSVC needed), and publishes them as a GitHub Release with generated notes.
+
+The portable `.exe` needs no installation: put it anywhere (a USB stick too) and run it. It uses the WebView2 runtime that comes with Windows 10 and 11.
+
+To rebuild the files of an existing release with the current workflow, run **Actions → Release → Run workflow** and enter its tag.
 
 CI runs fmt, clippy and the tests on Linux, Windows and macOS.
