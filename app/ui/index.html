@@ -7,102 +7,178 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="toolbar">
-    <div class="brand">MetaStamp</div>
-    <button id="add-files" class="primary">Add files…</button>
-    <button id="add-folder">Add folder…</button>
-    <button id="remove" disabled>Remove</button>
-    <button id="clear" disabled>Clear</button>
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4.2l2 2h8.8A1.5 1.5 0 0 1 21 9.5v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z" /><path d="M12 11v5M9.5 13.5h5" /></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 12.5h9l1-12.5" /></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 7 5 11l4 4" /><path d="M5 11h9.5a4.5 4.5 0 0 1 0 9H12" /></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3.5h8l4 4v13H6z" /><path d="M14 3.5v4h4" /></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" /></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" /><path d="M12 8v4.5M12 16h.01" /></symbol>
+    <symbol id="i-sort" viewBox="0 0 24 24"><path d="m8 10 4-4 4 4M8 14l4 4 4-4" /></symbol>
+    <symbol id="i-logo" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" /><path d="M12 7.5V12l3 2" /></symbol>
+  </svg>
+
+  <header class="titlebar">
+    <div class="brand"><svg class="logo"><use href="#i-logo" /></svg>MetaStamp</div>
+    <label class="search">
+      <svg><use href="#i-search" /></svg>
+      <input id="filter" type="search" placeholder="Filter files" autocomplete="off" spellcheck="false" />
+      <kbd data-keys="mod+F"></kbd>
+    </label>
     <span class="spacer"></span>
-    <label class="switch"><input type="checkbox" id="show-utc" /> Show times in UTC</label>
+    <div class="segmented" role="radiogroup" aria-label="Time zone" title="Time zone for every date shown and typed">
+      <button type="button" role="radio" data-zone="local">Local time</button>
+      <button type="button" role="radio" data-zone="utc">UTC</button>
+    </div>
+    <button id="add-folder" class="btn" title="Add folder (Shift+Ctrl+O)"><svg><use href="#i-folder" /></svg>Add folder</button>
+    <button id="add-files" class="btn primary" title="Add files (Ctrl+O)"><svg><use href="#i-plus" /></svg>Add files</button>
   </header>
 
   <main>
-    <section class="files">
-      <table id="table">
-        <thead>
-          <tr>
-            <th class="check"><input type="checkbox" id="select-all" title="Select all" /></th>
-            <th>Name</th>
-            <th>File created</th>
-            <th>File modified</th>
-            <th>Doc created</th>
-            <th>Doc last saved</th>
-            <th>Author</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
-      <div id="empty" class="empty">
-        <p class="big">Drop Office documents or folders here</p>
-        <p>or use <strong>Add files…</strong>. Word, Excel and PowerPoint files (.docx, .xlsx, .pptx) get their
-          document properties edited too; any other file gets its file dates only.</p>
+    <section class="list">
+      <div class="list-bar">
+        <span id="list-title" class="list-title">Files</span>
+        <span class="spacer"></span>
+        <button id="remove" class="btn subtle small" disabled title="Remove the selected files from the list (Delete)"><svg><use href="#i-trash" /></svg>Remove</button>
+        <button id="clear" class="btn subtle small" disabled>Clear list</button>
+      </div>
+      <div class="table-wrap" id="table-wrap">
+        <table>
+          <colgroup><col class="w-check" /><col /><col class="w-date" /><col class="w-date" /><col class="w-date" /><col class="w-date" /></colgroup>
+          <thead>
+            <tr class="groups">
+              <th class="c-check" rowspan="2"><input type="checkbox" id="select-all" class="cb" title="Select all (Ctrl+A)" /></th>
+              <th rowspan="2" data-sort="name">Name</th>
+              <th colspan="2" class="grp"><span>File</span></th>
+              <th colspan="2" class="grp"><span>Document</span></th>
+            </tr>
+            <tr class="cols">
+              <th data-sort="modified">Modified</th>
+              <th data-sort="created">Created</th>
+              <th data-sort="docCreated">Created</th>
+              <th data-sort="docModified">Last saved</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div id="no-match" class="no-match hidden">No files match the filter.</div>
+        <div id="empty" class="empty">
+          <div class="empty-art" aria-hidden="true">
+            <span class="ficon" data-kind="excel">X</span><span class="ficon" data-kind="word">W</span><span class="ficon" data-kind="powerpoint">P</span>
+          </div>
+          <h2>Drop files or folders here</h2>
+          <p>Word, Excel and PowerPoint files get their document properties edited as well as their file dates.
+            Any other file gets its file dates only.</p>
+          <div class="empty-actions">
+            <button class="btn primary" data-action="add-files"><svg><use href="#i-plus" /></svg>Add files</button>
+            <button class="btn" data-action="add-folder"><svg><use href="#i-folder" /></svg>Add folder</button>
+          </div>
+        </div>
       </div>
     </section>
 
-    <aside class="editor">
-      <h2>Edit <span id="sel-count">0 files</span></h2>
-      <button id="fill" class="link" disabled>Fill with values of the first selected file</button>
+    <aside class="inspector">
+      <div class="inspector-head">
+        <div id="sel-icon" class="sel-icon"></div>
+        <div class="sel-text">
+          <h2 id="sel-title">Nothing selected</h2>
+          <p id="sel-sub">Select files in the list to edit their dates.</p>
+        </div>
+      </div>
 
-      <fieldset>
-        <legend>File dates</legend>
-        <div class="field" data-group="fs" data-key="created">
-          <input type="checkbox" /><span>Created</span><input type="datetime-local" step="1" />
-          <button class="now" title="Set to now">Now</button>
-        </div>
-        <div class="field" data-group="fs" data-key="modified">
-          <input type="checkbox" /><span>Modified</span><input type="datetime-local" step="1" />
-          <button class="now" title="Set to now">Now</button>
-        </div>
-        <div class="field" data-group="fs" data-key="accessed">
-          <input type="checkbox" /><span>Accessed</span><input type="datetime-local" step="1" />
-          <button class="now" title="Set to now">Now</button>
-        </div>
-        <label class="option"><input type="checkbox" id="fs-from-core" />
-          Copy each document's created / last saved dates to its file dates</label>
-      </fieldset>
+      <div class="inspector-body">
+        <section class="group" id="group-fs">
+          <h3>File timestamps</h3>
+          <div class="field" data-group="fs" data-key="created" data-type="date">
+            <label for="fs-created">Created</label>
+            <div class="control"><input id="fs-created" type="datetime-local" step="1" /><span class="mixed-label">Mixed values</span>
+              <button class="icon now" title="Set to now"><svg><use href="#i-clock" /></svg></button>
+              <button class="icon reset" title="Undo this change"><svg><use href="#i-undo" /></svg></button></div>
+          </div>
+          <div class="field" data-group="fs" data-key="modified" data-type="date">
+            <label for="fs-modified">Modified</label>
+            <div class="control"><input id="fs-modified" type="datetime-local" step="1" /><span class="mixed-label">Mixed values</span>
+              <button class="icon now" title="Set to now"><svg><use href="#i-clock" /></svg></button>
+              <button class="icon reset" title="Undo this change"><svg><use href="#i-undo" /></svg></button></div>
+          </div>
+          <div class="field" data-group="fs" data-key="accessed" data-type="date">
+            <label for="fs-accessed">Accessed</label>
+            <div class="control"><input id="fs-accessed" type="datetime-local" step="1" /><span class="mixed-label">Mixed values</span>
+              <button class="icon now" title="Set to now"><svg><use href="#i-clock" /></svg></button>
+              <button class="icon reset" title="Undo this change"><svg><use href="#i-undo" /></svg></button></div>
+          </div>
+          <label class="switch-row">
+            <span class="switch-text">
+              <span>Match document dates</span>
+              <small>Set each document's file created and modified dates to its own document created and last saved dates.</small>
+            </span>
+            <input type="checkbox" id="fs-from-core" class="switch" />
+          </label>
+        </section>
 
-      <fieldset>
-        <legend>Document properties (core.xml)</legend>
-        <div class="field" data-group="core" data-key="created">
-          <input type="checkbox" /><span>Created</span><input type="datetime-local" step="1" />
-          <button class="now" title="Set to now">Now</button>
-        </div>
-        <div class="field" data-group="core" data-key="modified">
-          <input type="checkbox" /><span>Last saved</span><input type="datetime-local" step="1" />
-          <button class="now" title="Set to now">Now</button>
-        </div>
-        <div class="field" data-group="core" data-key="lastPrinted">
-          <input type="checkbox" /><span>Last printed</span><input type="datetime-local" step="1" />
-          <button class="now" title="Set to now">Now</button>
-        </div>
-        <div class="field" data-group="core" data-key="creator">
-          <input type="checkbox" /><span>Author</span><input type="text" />
-        </div>
-        <div class="field" data-group="core" data-key="lastModifiedBy">
-          <input type="checkbox" /><span>Last saved by</span><input type="text" />
-        </div>
-        <div class="field" data-group="core" data-key="revision">
-          <input type="checkbox" /><span>Revision</span><input type="text" inputmode="numeric" />
-        </div>
-        <div class="field" data-group="core" data-key="title">
-          <input type="checkbox" /><span>Title</span><input type="text" />
-        </div>
-      </fieldset>
+        <section class="group" id="group-core">
+          <h3>Document properties <span class="tag">core.xml</span></h3>
+          <p id="core-note" class="note hidden"></p>
+          <div class="field" data-group="core" data-key="created" data-type="date">
+            <label for="core-created">Created</label>
+            <div class="control"><input id="core-created" type="datetime-local" step="1" /><span class="mixed-label">Mixed values</span>
+              <button class="icon now" title="Set to now"><svg><use href="#i-clock" /></svg></button>
+              <button class="icon reset" title="Undo this change"><svg><use href="#i-undo" /></svg></button></div>
+          </div>
+          <div class="field" data-group="core" data-key="modified" data-type="date">
+            <label for="core-modified">Last saved</label>
+            <div class="control"><input id="core-modified" type="datetime-local" step="1" /><span class="mixed-label">Mixed values</span>
+              <button class="icon now" title="Set to now"><svg><use href="#i-clock" /></svg></button>
+              <button class="icon reset" title="Undo this change"><svg><use href="#i-undo" /></svg></button></div>
+          </div>
+          <div class="field" data-group="core" data-key="lastPrinted" data-type="date">
+            <label for="core-printed">Last printed</label>
+            <div class="control"><input id="core-printed" type="datetime-local" step="1" /><span class="mixed-label">Mixed values</span>
+              <button class="icon now" title="Set to now"><svg><use href="#i-clock" /></svg></button>
+              <button class="icon reset" title="Undo this change"><svg><use href="#i-undo" /></svg></button></div>
+          </div>
+          <div class="field" data-group="core" data-key="creator">
+            <label for="core-creator">Author</label>
+            <div class="control"><input id="core-creator" type="text" spellcheck="false" />
+              <button class="icon reset" title="Undo this change"><svg><use href="#i-undo" /></svg></button></div>
+          </div>
+          <div class="field" data-group="core" data-key="lastModifiedBy">
+            <label for="core-lastby">Last saved by</label>
+            <div class="control"><input id="core-lastby" type="text" spellcheck="false" />
+              <button class="icon reset" title="Undo this change"><svg><use href="#i-undo" /></svg></button></div>
+          </div>
+          <div class="field" data-group="core" data-key="revision">
+            <label for="core-revision">Revision</label>
+            <div class="control"><input id="core-revision" type="text" inputmode="numeric" spellcheck="false" />
+              <button class="icon reset" title="Undo this change"><svg><use href="#i-undo" /></svg></button></div>
+          </div>
+          <div class="field" data-group="core" data-key="title">
+            <label for="core-title">Title</label>
+            <div class="control"><input id="core-title" type="text" />
+              <button class="icon reset" title="Undo this change"><svg><use href="#i-undo" /></svg></button></div>
+          </div>
+        </section>
+      </div>
 
-      <fieldset class="zone">
-        <legend>Dates I type are in</legend>
-        <label><input type="radio" name="zone" value="local" checked /> Local time</label>
-        <label><input type="radio" name="zone" value="utc" /> UTC</label>
-      </fieldset>
-
-      <button id="apply" class="primary wide" disabled>Apply to selected</button>
-      <p id="hint" class="hint"></p>
+      <div class="applybar">
+        <span id="summary" class="summary">No changes</span>
+        <button id="discard" class="btn subtle" disabled>Discard</button>
+        <button id="apply" class="btn primary" disabled>Apply <kbd data-keys="mod+Enter"></kbd></button>
+      </div>
     </aside>
   </main>
 
-  <footer id="status">Ready.</footer>
-  <div id="drop" class="drop hidden">Drop to add</div>
+  <footer class="statusbar">
+    <span id="counts"></span>
+    <span class="spacer"></span>
+    <span id="zone-info"></span>
+  </footer>
+
+  <div id="toast" class="toast hidden" role="status"></div>
+  <div id="drop" class="drop hidden"><div><svg><use href="#i-plus" /></svg>Drop to add</div></div>
 
   <script src="main.js"></script>
 </body>
