@@ -60,4 +60,15 @@ On Linux the app needs the WebKitGTK development packages (see `.github/workflow
 
 To build installers: `cargo install tauri-cli --version "^2"`, then run `cargo tauri build` in `app/`. The **Build installers** workflow does this on every push and PR and uploads the Windows `.msi`/`.exe` and the macOS `.dmg` as artifacts.
 
+## Releasing
+
+Set the new version in `app/tauri.conf.json` (and `app/Cargo.toml`), merge it to `main`, then push a matching tag:
+
+```sh
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The **Release** workflow checks that the tag matches the app version, builds the Windows `.msi` and setup `.exe` and the macOS `.dmg` on GitHub's runners (no local MSVC needed), and publishes them as a GitHub Release with generated notes.
+
 CI runs fmt, clippy and the tests on Linux, Windows and macOS.
